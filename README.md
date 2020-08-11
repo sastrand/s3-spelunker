@@ -1,2 +1,2 @@
-# s3-tidy
-Utils to search, index, and generally wrangle unorganized files in s3
+# s3-spelunker
+Utils to search and map the vast and sometimes uncharted world of your own s3 account
