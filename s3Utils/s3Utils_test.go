@@ -1,4 +1,4 @@
-package s3_utils
+package s3Utils
 
 import (
 	"github.com/stretchr/testify/assert"

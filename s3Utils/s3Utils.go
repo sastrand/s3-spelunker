@@ -1,4 +1,4 @@
-package s3_utils
+package s3Utils
 
 import (
 	"context"
@@ -60,8 +60,8 @@ func HeadObject(bucket, key, region string) (*s3.HeadObjectOutput, error) {
 }
 
 // GetObjectMultiPart : downloads the specified object in parallel chunks
-// The tradeoffs to using this function are that it doesn't get the metadata in s3_utils.GetObjectOutput
-// that s3_utils.GetObject() returns in GetObjectSinglePart(). See headObject() for another way to get it.
+// The tradeoffs to using this function are that it doesn't get the metadata in s3Utils.GetObjectOutput
+// that s3Utils.GetObject() returns in GetObjectSinglePart(). See headObject() for another way to get it.
 // Also, as a warning, the maximum size for an s3 object is 5 TB and this function tries to load it all
 // into memory.
 func GetObjectMultiPart(bucket, key, region string) ([]byte, error) {
