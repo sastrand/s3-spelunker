@@ -2,6 +2,7 @@ package s3_utils
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io"
 	"os"
 	"testing"
 )
@@ -48,14 +49,19 @@ func TestGetObjectSinglePart(t *testing.T) {
 	assert.NoError(t, err)
 	buf := make([]byte, *actual.ContentLength)
 	_, err = actual.Body.Read(buf)
-	assert.NoError(t, err)
-	strr := string(buf)
-	assert.NotEmpty(t, strr)
+	// Read returns EOF when the stream ends
+	// https://tour.golang.org/methods/21
+	if err != io.EOF {
+		assert.NotEmpty(t, err)
+	}
 	assert.NotEmpty(t, buf)
 }
 
 func TestSessionWithGivenRegion(t *testing.T) {
-	expectedRegion := "us-east-1"
+	expectedRegion := "eu-south-1"
+	if expectedRegion == *globalSess.Config.Region {
+		panic("test requires expectedRegion different from default region")
+	}
 	actual, err := sessionWithGivenRegion(expectedRegion, globalSess)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedRegion, *actual.Config.Region)
@@ -65,4 +71,29 @@ func TestHeadObject(t *testing.T) {
 	actual, err := HeadObject(getTestBucket(), getTestKey(), getTestBucketRegion())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, actual.ETag)
+}
+
+func TestGetObjectMultiPart(t *testing.T) {
+	actual, err := GetObjectSinglePart(getTestBucket(), getTestKey(), getTestBucketRegion())
+	assert.NoError(t, err)
+	buf := make([]byte, *actual.ContentLength)
+	_, err = actual.Body.Read(buf)
+	if err != io.EOF {
+		assert.NotEmpty(t, err)
+	}
+	assert.NotEmpty(t, buf)
+}
+
+func TestPutStringSinglePart(t *testing.T) {
+	key := "test_upload.txt"
+	body := "hello"
+	err := PutStringSinglePart(getTestBucket(), key, getTestBucketRegion(), body)
+	assert.NoError(t, err)
+}
+
+func TestPutStringMultiPart(t *testing.T) {
+	key := "test_upload.txt"
+	body := "hello"
+	err := PutStringMultiPart(getTestBucket(), key, getTestBucketRegion(), body)
+	assert.NoError(t, err)
 }

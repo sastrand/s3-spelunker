@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"strings"
 )
 
 // A session can be shared across parallel clients as long as it's not being modified.
@@ -58,45 +59,47 @@ func HeadObject(bucket, key, region string) (*s3.HeadObjectOutput, error) {
 	})
 }
 
-//// GetObjectMultiPart : downloads the specified object in parallel chunks
-//// The tradeoffs to using this function are that it doesn't get the metadata in s3_utils.GetObjectOutput
-//// that s3_utils.GetObject() returns in GetObjectSinglePart(). See headObject() for another way to get it.
-//func GetObjectMultiPart(bucket, key, region string) ([]byte, error) {
-//	sess, err := sessionWithGivenRegion(region, globalSess)
-//	if err != nil {
-//		return nil, err
-//	}
-//	downloader := s3manager.NewDownloader(sess)
-//	buffer := aws.NewWriteAtBuffer([]byte{})
-//	_, err = downloader.Download(buffer, &s3.GetObjectInput{
-//		Bucket: aws.String(bucket),
-//		Key: aws.String(key),
-//	})
-//	if err != nil {
-//		return nil, err
-//	}
-//	return buffer.Bytes(), nil
-//}
-//
-//func PutStringSinglePart(bucket, key, region, body string) error {
-//	svc := s3.New(globalSess, aws.NewConfig().WithRegion(region))
-//	_, err := svc.PutObject((&s3.PutObjectInput{}).
-//		SetBucket(bucket).
-//		SetKey(key).
-//		SetBody(strings.NewReader(body)))
-//	return err
-//}
-//
-//func PutStringMultiPart(bucket, key, region, body string) error {
-//	sess, err := sessionWithGivenRegion(region, globalSess)
-//	if err != nil {
-//		return err
-//	}
-//	uploader := s3manager.NewUploader(sess)
-//	_, err = uploader.Upload(&s3manager.UploadInput{
-//		Bucket: aws.String(bucket),
-//		Key: aws.String(key),
-//		Body: strings.NewReader(body),
-//	})
-//	return err
-//}
+// GetObjectMultiPart : downloads the specified object in parallel chunks
+// The tradeoffs to using this function are that it doesn't get the metadata in s3_utils.GetObjectOutput
+// that s3_utils.GetObject() returns in GetObjectSinglePart(). See headObject() for another way to get it.
+// Also, as a warning, the maximum size for an s3 object is 5 TB and this function tries to load it all
+// into memory.
+func GetObjectMultiPart(bucket, key, region string) ([]byte, error) {
+	sess, err := sessionWithGivenRegion(region, globalSess)
+	if err != nil {
+		return nil, err
+	}
+	downloader := s3manager.NewDownloader(sess)
+	buffer := aws.NewWriteAtBuffer([]byte{})
+	_, err = downloader.Download(buffer, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key: aws.String(key),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func PutStringSinglePart(bucket, key, region, body string) error {
+	svc := s3.New(globalSess, aws.NewConfig().WithRegion(region))
+	_, err := svc.PutObject((&s3.PutObjectInput{}).
+		SetBucket(bucket).
+		SetKey(key).
+		SetBody(strings.NewReader(body)))
+	return err
+}
+
+func PutStringMultiPart(bucket, key, region, body string) error {
+	sess, err := sessionWithGivenRegion(region, globalSess)
+	if err != nil {
+		return err
+	}
+	uploader := s3manager.NewUploader(sess)
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucket),
+		Key: aws.String(key),
+		Body: strings.NewReader(body),
+	})
+	return err
+}
