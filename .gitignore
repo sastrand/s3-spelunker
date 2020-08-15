@@ -1,9 +1,13 @@
+# env vars
+local.env
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+s3-spelunker
 
 # Test binary, built with `go test -c`
 *.test
@@ -13,3 +17,6 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# JetBrains IDE config
+*.idea/
