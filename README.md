@@ -7,3 +7,12 @@ export env vars in `sample.env` with
 ```shell script
 export $(cat sample.env | xargs)
 ```
+
+## TODO
+```
+[ ] naive sub-string match
+[ ] parallel naive sub-string match
+[ ] rabin-karp sub-string match
+[ ] edge case test data
+[ ] read without loading string into memory
+```
