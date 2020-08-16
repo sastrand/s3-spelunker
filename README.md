@@ -10,8 +10,8 @@ export $(cat sample.env | xargs)
 
 ## TODO
 ```
-[ ] naieve sub-string match
-[ ] parallel naieve sub-string match
+[ ] naive sub-string match
+[ ] parallel naive sub-string match
 [ ] rabin-karp sub-string match
 [ ] edge case test data
 [ ] read without loading string into memory
